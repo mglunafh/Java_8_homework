@@ -80,24 +80,6 @@ public class Homework01 {
     int makeSum(int firstNumber, int secondNumber);
   }
 
-  @Test
-  public void getTransformedAndIncreasedNumberOnTwo() {
-
-    //TODO: create your realization with lambda
-    Transform transform = null;
-
-    //TODO: create your realization with lambda
-    Summarizer increment = null;
-
-    Counter suit_1 = new Counter(transform, increment);
-    Counter suit_2 = new Counter(transform, increment);
-    Counter suit_3 = new Counter(transform, increment);
-
-    assertEquals(5, suit_1.getSum("3", "2"));
-    assertEquals(10, suit_2.getSum("5", "5"));
-    assertEquals(57, suit_3.getSum("24", "33"));
-  }
-
   private class Counter {
 
     private Transform transform;
@@ -114,6 +96,24 @@ public class Homework01 {
       int secondTransformedNumber = transform.convert(secondInput);
       return summarizer.makeSum(firstTransformedNumber, secondTransformedNumber);
     }
+  }
+
+  @Test
+  public void getTransformedAndIncreasedNumberOnTwo() {
+
+    //TODO: create your realization with lambda
+    Transform transform = null;
+
+    //TODO: create your realization with lambda
+    Summarizer increment = null;
+
+    Counter suit_1 = new Counter(transform, increment);
+    Counter suit_2 = new Counter(transform, increment);
+    Counter suit_3 = new Counter(transform, increment);
+
+    assertEquals(5, suit_1.getSum("3", "2"));
+    assertEquals(10, suit_2.getSum("5", "5"));
+    assertEquals(57, suit_3.getSum("24", "33"));
   }
 
   @Test

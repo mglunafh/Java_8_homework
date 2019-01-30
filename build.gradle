@@ -14,3 +14,11 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+task testHm(type: Test){
+    for (n in 1..System.getenv("WEEK_TST").toInteger()){
+        filter {
+            includeTestsMatching "com.make.my.day.hm${n}*"
+        }
+    }
+}
