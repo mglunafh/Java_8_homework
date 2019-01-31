@@ -99,7 +99,7 @@ public class Homework01 {
   }
 
   @Test
-  public void getTransformedAndIncreasedNumberOnTwo() {
+  public void transformAndProvideSumWithCounter() {
 
     //TODO: create your realization with lambda
     Transform transform = null;

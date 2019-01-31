@@ -10,24 +10,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class Homework02 {
-
-  private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-  private final PrintStream originalOut = System.out;
-
-  @Before
-  public void setUpStreams() {
-    System.setOut(new PrintStream(outContent));
-  }
-
-  @After
-  public void restoreStreams() {
-    System.setOut(originalOut);
-  }
 
   @Test
   public void concatenateChars() {
@@ -82,7 +67,7 @@ public class Homework02 {
   }
 
   @Test
-  public void getTransformedAndIncreasedNumberOnTwo() {
+  public void transformAndProvideSumWithCounter() {
     //TODO: create your realization with lambda
     Function<String, Integer> transform = null;
 
@@ -99,11 +84,86 @@ public class Homework02 {
   }
 
   @Test
-  public void name() {
-    Consumer<String> printHelloInSystemOut = System.out::print;
+  public void consumerPrintInPrintStream() {
+    final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    final PrintStream original = System.out;
+    System.setOut(new PrintStream(outContent));
+
+    //TODO: method must print parameters in System.out
+    Consumer<Object> printHelloInSystemOut = null;
 
     printHelloInSystemOut.accept("hello");
+    assertEquals("hello", outContent.toString());
 
-    assertEquals("hello",outContent.toString());
+    outContent.reset();
+
+    printHelloInSystemOut.accept("epam");
+    assertEquals("epam", outContent.toString());
+
+    outContent.reset();
+
+    printHelloInSystemOut.accept(12345);
+    assertEquals("12345", outContent.toString());
+
+    System.setOut(original);
   }
+
+  @Test
+  public void testPredicateScenario() {
+
+    //TODO: create your realization with lambda
+    Predicate<String> isStartsWithXX = null;
+
+    //TODO: create your realization with lambda
+    Predicate<String> isEndWithZZZ = isStartsWithXX.and(null);
+
+    //TODO: create your realization with lambda
+    Predicate<String> haveFiveStarsInRow = isEndWithZZZ.or(null);
+
+    assertFalse(haveFiveStarsInRow.test("Xnot_rightZZZ"));
+    assertTrue(haveFiveStarsInRow.test("XXsuperduperZZZ"));
+    assertFalse(haveFiveStarsInRow.test("XXnotrighttooZZ"));
+    assertTrue(haveFiveStarsInRow.test("one*two**three***four****five*****"));
+    assertFalse(haveFiveStarsInRow.test("this**will**fail*"));
+  }
+
+  //TODO: implement predicate with lambda
+  private static Predicate<String> lengthMoreThanSeven() {
+    return null;
+  }
+
+  //TODO: implement, if predicate correct "str" => "strstr" if not "str..."
+  private static Function<Predicate<String>, Function<String, String>> doubleStringOrAddThreeDots() {
+    return null;
+  }
+
+  //TODO: implement, return word length from function
+  private static Function<String, Integer> lengthOfWord(
+      Function<Predicate<String>, Function<String, String>> doubledOrWithThreeDots) {
+    return null;
+  }
+
+  @Test
+  public void checkDeepCallBack() {
+    assertFalse(lengthMoreThanSeven().test("no"));
+    assertTrue(lengthMoreThanSeven().test("wonderful"));
+    assertFalse(lengthMoreThanSeven().test("welcome"));
+
+
+    assertEquals("no...", doubleStringOrAddThreeDots()
+        .apply(lengthMoreThanSeven()).apply("no"));
+
+    assertEquals("wonderfulwonderful", doubleStringOrAddThreeDots()
+        .apply(lengthMoreThanSeven()).apply("wonderful"));
+
+    assertEquals("welcome...", doubleStringOrAddThreeDots()
+        .apply(lengthMoreThanSeven()).apply("welcome"));
+
+
+    assertEquals(5, lengthOfWord(doubleStringOrAddThreeDots()).apply("no").intValue());
+    assertEquals(18, lengthOfWord(doubleStringOrAddThreeDots()).apply("wonderful").intValue());
+    assertEquals(10, lengthOfWord(doubleStringOrAddThreeDots()).apply("welcome").intValue());
+  }
+
+  //Add lazy loading task
 }
