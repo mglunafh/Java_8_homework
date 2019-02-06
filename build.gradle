@@ -16,7 +16,11 @@ dependencies {
 }
 
 task testHm(type: Test){
-    for (n in 1..System.getenv("WEEK_TST").toInteger()){
+    int day = 1
+    try{
+        day = System.getenv("WEEK_TST").toInteger()
+    } catch (Exception ignore){}
+    for (n in 1..day){
         filter {
             includeTestsMatching "com.make.my.day.hm${n}*"
         }

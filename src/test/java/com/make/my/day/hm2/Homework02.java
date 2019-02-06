@@ -2,14 +2,19 @@ package com.make.my.day.hm2;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import org.junit.Test;
 
 public class Homework02 {
@@ -127,6 +132,44 @@ public class Homework02 {
     assertFalse(haveFiveStarsInRow.test("this**will**fail*"));
   }
 
+  @Test
+  public void chainOfFunctionInvocation() {
+    List<Integer> numbers = new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7,8,9,10));
+
+    //TODO: create realization with lambda
+    Predicate<Integer> isEven = null;
+
+    List<Integer> evenNumbersList = new ArrayList<>();
+
+    for (Integer num : numbers) {
+      if (isEven.test(num)){
+        evenNumbersList.add(num);
+      }
+    }
+
+    assertTrue(evenNumbersList.containsAll(Arrays.asList(2,4,6,8,10)));
+
+    //TODO: create realization with lambda
+    Function<List<Integer>, List<Integer>> sumWithNextElement = null;
+
+    List<Integer> newNumbers = sumWithNextElement.apply(evenNumbersList);
+
+    assertTrue(newNumbers.containsAll(Arrays.asList(6,10,14,18,12)));
+
+    //TODO: create realization with lambda
+    Predicate<Integer> moreThanThirteen = null;
+
+    List<Integer> numbersMoreThanFifteen = new ArrayList<>();
+
+    for (Integer num : newNumbers) {
+      if (moreThanThirteen.test(num)){
+        numbersMoreThanFifteen.add(num);
+      }
+    }
+
+    assertTrue(numbersMoreThanFifteen.containsAll(Arrays.asList(14,18)));
+  }
+
   //TODO: implement predicate with lambda
   private static Predicate<String> lengthMoreThanSeven() {
     return null;
@@ -165,5 +208,53 @@ public class Homework02 {
     assertEquals(10, lengthOfWord(doubleStringOrAddThreeDots()).apply("welcome").intValue());
   }
 
-  //Add lazy loading task
+  private class LazyProperty {
+    private Supplier<Integer> supplier;
+    private Integer lazy;
+
+    public LazyProperty(Supplier<Integer> supplier) {
+      this.supplier = supplier;
+    }
+
+    //TODO: initialize "lazy" using "supplier" only one time
+    public int getLazy() {
+      return 0;
+    }
+  }
+
+  @Test
+  public void lazyLoading() {
+
+    //TODO: provide supplier in constructor with lambda
+    LazyProperty suit = new LazyProperty(null);
+    LazyProperty suit_2 = new LazyProperty(null);
+    LazyProperty suit_3 = new LazyProperty(null);
+
+    assertNull(suit.lazy);
+    assertNull(suit_2.lazy);
+    assertNull(suit_3.lazy);
+
+    assertEquals(1,suit.getLazy());
+    assertEquals(2,suit_2.getLazy());
+    assertEquals(3,suit_3.getLazy());
+
+    assertEquals(1,suit.lazy.intValue());
+    assertEquals(2,suit_2.lazy.intValue());
+    assertEquals(3,suit_3.lazy.intValue());
+  }
+
+  @Test
+  public void andThenTest() {
+    //TODO: realize with lambda
+    Function<Integer, Integer> sumIntegerOnSix = null;
+    Function<Integer, Integer> thenMinusThree = null;
+    Function<Integer, Integer> afterMultipleOnFive = null;
+
+    Integer result = sumIntegerOnSix
+        .andThen(thenMinusThree)
+        .andThen(afterMultipleOnFive)
+        .apply(10);
+
+    assertEquals(65, result.intValue());
+  }
 }
