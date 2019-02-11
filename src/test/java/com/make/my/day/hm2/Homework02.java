@@ -79,13 +79,13 @@ public class Homework02 {
     //TODO: create your realization with lambda
     BinaryOperator<Integer> increment = null;
 
-    Counter suit_1 = new Counter(transform, increment);
-    Counter suit_2 = new Counter(transform, increment);
-    Counter suit_3 = new Counter(transform, increment);
+    Counter sut_1 = new Counter(transform, increment);
+    Counter sut_2 = new Counter(transform, increment);
+    Counter sut_3 = new Counter(transform, increment);
 
-    assertEquals(5, suit_1.getSum("3", "2"));
-    assertEquals(10, suit_2.getSum("5", "5"));
-    assertEquals(57, suit_3.getSum("24", "33"));
+    assertEquals(5, sut_1.getSum("3", "2"));
+    assertEquals(10, sut_2.getSum("5", "5"));
+    assertEquals(57, sut_3.getSum("24", "33"));
   }
 
   @Test
@@ -226,21 +226,21 @@ public class Homework02 {
   public void lazyLoading() {
 
     //TODO: provide supplier in constructor with lambda
-    LazyProperty suit = new LazyProperty(null);
-    LazyProperty suit_2 = new LazyProperty(null);
-    LazyProperty suit_3 = new LazyProperty(null);
+    LazyProperty sut = new LazyProperty(null);
+    LazyProperty sut_2 = new LazyProperty(null);
+    LazyProperty sut_3 = new LazyProperty(null);
 
-    assertNull(suit.lazy);
-    assertNull(suit_2.lazy);
-    assertNull(suit_3.lazy);
+    assertNull(sut.lazy);
+    assertNull(sut_2.lazy);
+    assertNull(sut_3.lazy);
 
-    assertEquals(1,suit.getLazy());
-    assertEquals(2,suit_2.getLazy());
-    assertEquals(3,suit_3.getLazy());
+    assertEquals(1,sut.getLazy());
+    assertEquals(2,sut_2.getLazy());
+    assertEquals(3,sut_3.getLazy());
 
-    assertEquals(1,suit.lazy.intValue());
-    assertEquals(2,suit_2.lazy.intValue());
-    assertEquals(3,suit_3.lazy.intValue());
+    assertEquals(1,sut.lazy.intValue());
+    assertEquals(2,sut_2.lazy.intValue());
+    assertEquals(3,sut_3.lazy.intValue());
   }
 
   @Test
