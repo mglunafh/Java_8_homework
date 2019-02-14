@@ -85,4 +85,33 @@ public class Homework03 {
     assertArrayEquals(expected, agents.toArray());
   }
 
+  @Test
+  public void mapWordsReverse() {
+    Stream<String> words = Stream.of("We", "all", "do", "our", "best");
+
+    // TODO: Create "map" realization
+    words = words.map(null);
+
+    assertArrayEquals(
+        new String[]{"eW", "lla", "od", "ruo", "tseb"},
+        words.toArray(String[]::new)
+    );
+  }
+
+  @Test
+  public void mapFilterMapTest() {
+    IntStream numbers = IntStream.of(1, 7, 4, 6, 3, 13, 2, 6, 8);
+
+    // TODO: 1) increment each element
+    // TODO: 2) filter on even numbers
+    // TODO: 3) each element multiply on 2
+
+    int[] result = numbers
+        //add here realization
+        .toArray();
+
+    assertArrayEquals(new int[]{4, 16, 8, 28}, result);
+  }
+
+
 }
