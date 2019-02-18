@@ -1,7 +1,9 @@
 package com.make.my.day.hm3;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -113,5 +115,26 @@ public class Homework03 {
     assertArrayEquals(new int[]{4, 16, 8, 28}, result);
   }
 
+  @Test
+  public void flatMapCheck() {
+    String[] words = new String[]{"Hel", "lo", " won", "der", "ful", " ","world", "!"};
+
+    // TODO: Uncomment and add correct realization of flatMap 
+    String bigString = null; /*Arrays.stream(words)
+        .flatMap(null)
+        .collect(Collectors.joining());
+        */
+    assertEquals("Hello wonderful world!", bigString);
+  }
+
+  @Test
+  public void uniqueValues() {
+    List<Integer> numbers = Arrays.asList(1, 1, 3, 3, 12, 11, 12, 11, 11, 1, 3);
+
+    // TODO: Use numbers.stream()... add realization to get unique values
+    int [] result = null;
+
+    assertArrayEquals(new int[]{1, 3, 12, 11}, result);
+  }
 
 }
