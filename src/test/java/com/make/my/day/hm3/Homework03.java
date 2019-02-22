@@ -34,7 +34,7 @@ public class Homework03 {
     Stream<Integer> prepared = Stream.concat(null, null);
     Stream<Integer> result = Stream.concat(null, null);
 
-    assertArrayEquals(new Integer[]{1,2,3,4,5,6},result.toArray());
+    assertArrayEquals(new Integer[]{1, 2, 3, 4, 5, 6}, result.toArray());
   }
 
   @Test
@@ -116,6 +116,21 @@ public class Homework03 {
   }
 
   @Test
+  public void sortedByRepeatableChars() {
+    List<String> words = Arrays.asList("Privet", "Elevate", "Splendid", "Ssssssuper");
+
+    String[] result = words.stream()
+        // TODO: Add realization
+        .sorted(null)
+        .toArray(String[]::new);
+
+    // TODO: For example "Twitter" and "Hello" -> there 3 "t" chars and 2 "l" chars 3 > 2
+    // TODO: So the first word will be Twitter then Hello
+    assertArrayEquals(new String[]{"Ssssssuper", "Elevate", "Splendid", "Privet"}, result);
+  }
+
+
+  @Test
   public void flatMapCheck() {
     String[] words = new String[]{"Hel", "lo", " won", "der", "ful", " ","world", "!"};
 
@@ -137,4 +152,13 @@ public class Homework03 {
     assertArrayEquals(new int[]{1, 3, 12, 11}, result);
   }
 
+  @Test
+  public void getSumWithReduce() {
+    List<Integer> numbers = Arrays.asList(4,4,2,2,8,10);
+    Integer result = numbers.stream()
+        // TODO: Add realization
+        .reduce(0, null);
+
+    assertEquals(30, result.intValue());
+  }
 }
