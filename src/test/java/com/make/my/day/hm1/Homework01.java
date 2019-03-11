@@ -1,14 +1,11 @@
 package com.make.my.day.hm1;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class Homework01 {
 
@@ -24,12 +21,13 @@ public class Homework01 {
   @Test
   public void concatenateChars() {
     //TODO: create your realization with lambda
-    Test01 sut = chars -> { String result = "";
-      for (char c:chars) {
-        result = result.concat(String.valueOf(c));
-      }
-      return result;
-    };
+      Test01 sut = chars -> {
+          String result = "";
+          for (char c : chars) {
+              result = result.concat(String.valueOf(c));
+          }
+          return result;
+      };
 
     String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
     String result_2 = sut.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
@@ -52,7 +50,9 @@ public class Homework01 {
   @Test
   public void reversedWord() {
     //TODO: create your realization with lambda
-    Test02 sut = null;
+
+    Test02 sut = (String str) -> IntStream.range(0,str.length()/2)
+            .allMatch(i -> str.charAt(i) == str.charAt(str.length() - 1 - i));
 
     boolean result_1 = sut.isReversedStringTheSame("abccba");
     boolean result_2 = sut.isReversedStringTheSame("level");
