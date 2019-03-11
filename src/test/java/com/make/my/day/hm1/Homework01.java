@@ -21,13 +21,13 @@ public class Homework01 {
   @Test
   public void concatenateChars() {
     //TODO: create your realization with lambda
-      Test01 sut = chars -> {
-          String result = "";
-          for (char c : chars) {
-              result = result.concat(String.valueOf(c));
-          }
-          return result;
-      };
+    Test01 sut = chars -> {
+      StringBuilder result = new StringBuilder();
+      for (char c : chars) {
+        result.append(c);
+      }
+      return result.toString();
+    };
 
     String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
     String result_2 = sut.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
