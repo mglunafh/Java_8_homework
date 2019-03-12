@@ -118,6 +118,7 @@ public class Homework01 {
 
   @Test
   public void sortNamesAlphabetically () {
+
     String[] names = {"Fred", "Maggy", "Suzan", "Loid", "Nir", "Lo", "Stefan", "Maximilian"};
 
     //TODO: Write Comparator realization with lambda expression
