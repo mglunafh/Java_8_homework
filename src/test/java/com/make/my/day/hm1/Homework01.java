@@ -21,8 +21,8 @@ public class Homework01 {
 
   @Test
   public void concatenateChars() {
-    
-    Test01 sut = String::new;
+    //TODO: create your realization with lambda
+    Test01 sut = chars -> null;
 
     String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
     String result_2 = sut.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
@@ -44,9 +44,9 @@ public class Homework01 {
 
   @Test
   public void reversedWord() {
+    //TODO: create your realization with lambda
+    Test02 sut = null;
 
-    Test02 sut = s -> s.equals(new StringBuilder(s).reverse().toString());
-    
     boolean result_1 = sut.isReversedStringTheSame("abccba");
     boolean result_2 = sut.isReversedStringTheSame("level");
     boolean result_3 = sut.isReversedStringTheSame("cow");
@@ -101,9 +101,11 @@ public class Homework01 {
   @Test
   public void transformAndProvideSumWithCounter() {
 
-    Transform transform = Integer::parseInt;
+    //TODO: create your realization with lambda
+    Transform transform = null;
 
-    Summarizer increment = (n1, n2) -> n1 + n2;
+    //TODO: create your realization with lambda
+    Summarizer increment = null;
 
     Counter sut_1 = new Counter(transform, increment);
     Counter sut_2 = new Counter(transform, increment);
@@ -118,7 +120,8 @@ public class Homework01 {
   public void sortByNameLength() {
     String[] names = {"Fred", "Maggy", "Suzan", "Loid", "Nir", "Lo", "Stefan", "Maximilian"};
 
-    Arrays.sort(names, (s1, s2) -> s1.length() - s2.length());
+    //TODO: Write Comparator realization with lambda expression
+    Arrays.sort(names, null);
 
     String[] expectedSortedNames = {"Lo", "Nir", "Fred", "Loid", "Maggy",
         "Suzan", "Stefan", "Maximilian"};
