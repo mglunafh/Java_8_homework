@@ -117,7 +117,7 @@ public class Homework01 {
   }
 
   @Test
-  public void sortNamesAlphabetically () {
+  public void sortByNameLength() {
 
     String[] names = {"Fred", "Maggy", "Suzan", "Loid", "Nir", "Lo", "Stefan", "Maximilian"};
 
