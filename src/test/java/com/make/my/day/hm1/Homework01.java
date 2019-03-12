@@ -22,7 +22,8 @@ public class Homework01 {
   @Test
   public void concatenateChars() {
     //TODO: create your realization with lambda
-    Test01 sut = chars -> null;
+    Test01 sut = chars -> String.valueOf(chars);
+    //Test01 sut = String::valueOf;
 
     String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
     String result_2 = sut.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
@@ -37,15 +38,15 @@ public class Homework01 {
   private interface Test02 {
 
     /**
-     * Check reverse word exm: "word" == "drow" -> false exm2: "eye" == "eye"  -> true
+     * Check if word is palindrome exm: "word" == "drow" -> false exm2: "eye" == "eye"  -> true
      */
     boolean isReversedStringTheSame(String word);
   }
 
   @Test
-  public void reversedWord() {
+  public void isWordPalindrome() {
     //TODO: create your realization with lambda
-    Test02 sut = null;
+    Test02 sut = word -> word.equals(new StringBuilder(word).reverse().toString());
 
     boolean result_1 = sut.isReversedStringTheSame("abccba");
     boolean result_2 = sut.isReversedStringTheSame("level");
@@ -102,10 +103,13 @@ public class Homework01 {
   public void transformAndProvideSumWithCounter() {
 
     //TODO: create your realization with lambda
-    Transform transform = null;
+    Transform transform = input -> Integer.parseInt(input);
+    //Transform transform = Integer::parseInt;
+    //Transform transform = input -> input != null ? Integer.parseInt(input) : 0;
 
     //TODO: create your realization with lambda
-    Summarizer increment = null;
+    Summarizer increment = (int1,int2) -> int1+int2;
+    //Summarizer increment = Integer::sum;
 
     Counter sut_1 = new Counter(transform, increment);
     Counter sut_2 = new Counter(transform, increment);
@@ -117,11 +121,13 @@ public class Homework01 {
   }
 
   @Test
-  public void sortByNameDistinct() {
+  public void sortByNameLength() {
+
     String[] names = {"Fred", "Maggy", "Suzan", "Loid", "Nir", "Lo", "Stefan", "Maximilian"};
 
     //TODO: Write Comparator realization with lambda expression
-    Arrays.sort(names, null);
+    Arrays.sort(names, (s1,s2) -> s1.length()-s2.length());
+    //Arrays.sort(names, Comparator.comparingInt(String::length));
 
     String[] expectedSortedNames = {"Lo", "Nir", "Fred", "Loid", "Maggy",
         "Suzan", "Stefan", "Maximilian"};
