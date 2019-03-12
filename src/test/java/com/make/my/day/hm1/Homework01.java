@@ -108,7 +108,7 @@ public class Homework01 {
     //Transform transform = input -> input != null ? Integer.parseInt(input) : 0;
 
     //TODO: create your realization with lambda
-    Summarizer increment = (o1,o2) -> o1+o2;
+    Summarizer increment = (int1,int2) -> int1+int2;
     //Summarizer increment = Integer::sum;
 
     Counter sut_1 = new Counter(transform, increment);
