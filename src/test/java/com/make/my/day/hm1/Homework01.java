@@ -1,12 +1,11 @@
 package com.make.my.day.hm1;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.Arrays;
-import org.junit.Test;
+import java.util.stream.IntStream;
+
+import static org.junit.Assert.*;
 
 public class Homework01 {
 
@@ -22,7 +21,13 @@ public class Homework01 {
   @Test
   public void concatenateChars() {
     //TODO: create your realization with lambda
-    Test01 sut = chars -> null;
+    Test01 sut = chars -> {
+      StringBuilder result = new StringBuilder();
+      for (char c : chars) {
+        result.append(c);
+      }
+      return result.toString();
+    };
 
     String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
     String result_2 = sut.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
@@ -45,7 +50,9 @@ public class Homework01 {
   @Test
   public void reversedWord() {
     //TODO: create your realization with lambda
-    Test02 sut = null;
+
+    Test02 sut = (String str) -> IntStream.range(0,str.length()/2)
+            .allMatch(i -> str.charAt(i) == str.charAt(str.length() - 1 - i));
 
     boolean result_1 = sut.isReversedStringTheSame("abccba");
     boolean result_2 = sut.isReversedStringTheSame("level");
@@ -102,10 +109,10 @@ public class Homework01 {
   public void transformAndProvideSumWithCounter() {
 
     //TODO: create your realization with lambda
-    Transform transform = null;
+    Transform transform = Integer::parseInt;
 
     //TODO: create your realization with lambda
-    Summarizer increment = null;
+    Summarizer increment = (num1, num2) -> num1 + num2 ;
 
     Counter sut_1 = new Counter(transform, increment);
     Counter sut_2 = new Counter(transform, increment);
@@ -121,7 +128,7 @@ public class Homework01 {
     String[] names = {"Fred", "Maggy", "Suzan", "Loid", "Nir", "Lo", "Stefan", "Maximilian"};
 
     //TODO: Write Comparator realization with lambda expression
-    Arrays.sort(names, null);
+    Arrays.sort(names, (str1, str2) -> str1.length() - str2.length());
 
     String[] expectedSortedNames = {"Lo", "Nir", "Fred", "Loid", "Maggy",
         "Suzan", "Stefan", "Maximilian"};
