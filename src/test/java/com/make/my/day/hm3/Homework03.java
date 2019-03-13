@@ -4,12 +4,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,7 +35,7 @@ public class Homework03 {
     Stream<Integer> intStream_2 = Stream.of(3, 4);
     Stream<Integer> intStream_3 = Stream.of(5, 6);
 
-    Stream<Integer> prepared = Stream.concat(intStream , intStream_2);
+    Stream<Integer> prepared = Stream.concat(intStream, intStream_2);
     Stream<Integer> result = Stream.concat(prepared, intStream_3);
 
     assertArrayEquals(new Integer[]{1, 2, 3, 4, 5, 6}, result.toArray());
@@ -44,7 +44,7 @@ public class Homework03 {
   @Test
   public void iterateForNineHundredsElements() {
 
-    Stream<Integer> stream = Stream.iterate(0, i -> i + 1);
+    Stream<Integer> stream = Stream.iterate(100, i -> i + 1).limit(900);
 
     Integer[] expected = new Integer[900];
     for (int i = 100, j = 0; j < 900; i++, j++) {
@@ -63,7 +63,8 @@ public class Homework03 {
     assertArrayEquals(arr, sut.toArray());
   }
 
-  private class Agent{
+  private class Agent {
+
     private final String name = "Smith";
 
     @Override
@@ -82,7 +83,7 @@ public class Homework03 {
   @Test
   public void provideStreamWithGenerate() {
 
-    Stream<Agent> agents = Stream.generate(Agent::new);
+    Stream<Agent> agents = Stream.generate(Agent::new).limit(3000);
 
     Agent[] expected = new Agent[3000];
     for (int i = 0; i < 3000; i++) {
@@ -109,7 +110,7 @@ public class Homework03 {
     IntStream numbers = IntStream.of(1, 7, 4, 6, 3, 13, 2, 6, 8)
         .map(i -> i + 1)
         .filter(i -> i % 2 == 0)
-        .map(i -> i  *2);
+        .map(i -> i * 2);
 
     // TODO: 1) increment each element
     // TODO: 2) filter on even numbers
@@ -125,15 +126,19 @@ public class Homework03 {
     List<String> words = Arrays.asList("Privet", "Elevate", "Splendid", "Ssssssuper");
 
     Function<String, Integer> mostCommonLetter = (s) -> {
-      char[] chars = new char[s.length()];
-      Arrays.sort(chars);
-      
-      return 0;
+
+      Map<Integer, Integer> charLengths = s.toLowerCase().chars().mapToObj(x -> x)
+          .collect(HashMap::new,
+          (Map<Integer, Integer> map, Integer ch) -> map
+              .put(ch, map.containsKey(ch) ? map.get(ch) + 1 : 1),
+              Map::putAll);
+
+      return charLengths.values().stream().max(Integer::compareTo).orElse(0);
     };
-    
+
     String[] result = words.stream()
         // TODO: Add realization
-        .sorted((s1, s2) -> mostCommonLetter.apply(s2) - mostCommonLetter.apply(s1))
+        .sorted(Comparator.comparingInt(mostCommonLetter::apply).reversed())
         .toArray(String[]::new);
 
     // TODO: For example "Twitter" and "Hello" -> there 3 "t" chars and 2 "l" chars 3 > 2
@@ -144,13 +149,13 @@ public class Homework03 {
 
   @Test
   public void flatMapCheck() {
-    String[] words = new String[]{"Hel", "lo", " won", "der", "ful", " ","world", "!"};
+    String[] words = new String[]{"Hel", "lo", " won", "der", "ful", " ", "world", "!"};
 
     // TODO: Uncomment and add correct realization of flatMap 
-    String bigString = null; /*Arrays.stream(words)
-        .flatMap(null)
+    String bigString = Arrays.stream(words)
+//        .flatMap(x -> x)
         .collect(Collectors.joining());
-        */
+
     assertEquals("Hello wonderful world!", bigString);
   }
 
@@ -159,17 +164,17 @@ public class Homework03 {
     List<Integer> numbers = Arrays.asList(1, 1, 3, 3, 12, 11, 12, 11, 11, 1, 3);
 
     // TODO: Use numbers.stream()... add realization to get unique values
-    int [] result = null;
+    int[] result = numbers.stream().mapToInt(x -> x).distinct().toArray();
 
     assertArrayEquals(new int[]{1, 3, 12, 11}, result);
   }
 
   @Test
   public void getSumWithReduce() {
-    List<Integer> numbers = Arrays.asList(4,4,2,2,8,10);
+    List<Integer> numbers = Arrays.asList(4, 4, 2, 2, 8, 10);
     Integer result = numbers.stream()
         // TODO: Add realization
-        .reduce(0, null);
+        .reduce(0, (x, y) -> x + y);
 
     assertEquals(30, result.intValue());
   }

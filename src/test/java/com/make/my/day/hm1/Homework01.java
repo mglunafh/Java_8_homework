@@ -21,7 +21,7 @@ public class Homework01 {
 
   @Test
   public void concatenateChars() {
-    
+
     Test01 sut = String::new;
 
     String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
@@ -46,7 +46,7 @@ public class Homework01 {
   public void reversedWord() {
 
     Test02 sut = s -> s.equals(new StringBuilder(s).reverse().toString());
-    
+
     boolean result_1 = sut.isReversedStringTheSame("abccba");
     boolean result_2 = sut.isReversedStringTheSame("level");
     boolean result_3 = sut.isReversedStringTheSame("cow");

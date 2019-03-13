@@ -3,8 +3,10 @@ package com.make.my.day.hm4;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +20,7 @@ public class Homework04 {
     String[] words = new String[]{"one", "two", "three"};
 
     List<String> result = Arrays.stream(words)
-        // TODO: Add realization
-        .collect(null, null, null);
+        .collect(ArrayList::new, List::add, List::addAll);
 
     assertArrayEquals(words, result.toArray());
   }
@@ -29,8 +30,7 @@ public class Homework04 {
     String[] words = new String[]{"one", "one", "two", "two", "three"};
 
     Set<String> result = Arrays.stream(words)
-        // TODO: Add realization
-        .collect(null, null, null);
+        .collect(HashSet::new, Set::add, Set::addAll);
 
     assertArrayEquals(new String[]{"one", "two", "three"}, result.toArray());
   }
@@ -41,7 +41,9 @@ public class Homework04 {
 
     Map<String, Integer> result = Arrays.stream(words)
         // TODO: Add realization to store words - count. If key the same value must increment
-        .collect(null, null, null);
+        .collect(HashMap::new,
+            (map, word) -> map.put(word, map.containsKey(word) ? (map.get(word) + 1) : 1),
+            Map::putAll);
 
     Map<String, Integer> expected = new HashMap<>();
     expected.put("one", 3);
@@ -57,9 +59,10 @@ public class Homework04 {
 
     List<String> result = Arrays.stream(words)
         // TODO: Add realization. Should get unique words and concatenate themselves
+        .distinct()
         .collect(Collectors.collectingAndThen(
-            null,
-            null
+            Collectors.toList(),
+            list -> list.stream().map(s -> s + s).collect(Collectors.toList())
         ));
 
     assertArrayEquals(new String[]{"oneone", "twotwo", "threethree"}, result.toArray());
@@ -71,7 +74,7 @@ public class Homework04 {
 
     String result = Arrays.stream(words)
         // TODO: Add realization
-        .collect(null);
+        .collect(Collectors.joining(", ", "Materials[ ", " ]"));
 
     assertEquals("Materials[ Glass, Steel, Wood, Stone ]", result);
   }
@@ -82,7 +85,7 @@ public class Homework04 {
 
     Map<Integer, List<String>> result = Arrays.stream(words)
         // TODO: Use here grouping by
-        .collect(null);
+        .collect(Collectors.groupingBy((String str) -> str.length()));
 
     Map<Integer, List<String>> expected = new HashMap<>();
     expected.put(3, Arrays.asList("one", "one", "one", "two", "two"));
@@ -92,7 +95,8 @@ public class Homework04 {
   }
 
 
-  private class Dog{
+  private class Dog {
+
     private String name;
     private int age;
 
@@ -127,7 +131,8 @@ public class Homework04 {
 
     Map<String, List<Integer>> result = dogs.stream()
         // TODO: Use here `groupingBy` plus `mapping`
-        .collect(null);
+        .collect(Collectors.groupingBy((Dog dog) -> dog.getName(),
+            Collectors.mapping((Dog dog) -> dog.getAge(), Collectors.toList())));
 
     Map<String, List<Integer>> expected = new HashMap<>();
     expected.put("Bim", Arrays.asList(4, 8));
