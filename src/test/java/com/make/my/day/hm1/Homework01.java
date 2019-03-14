@@ -22,11 +22,11 @@ public class Homework01 {
   @Test
   public void concatenateChars() {
     //TODO: create your realization with lambda
-    Test01 suit = chars -> null;
+    Test01 sut = chars -> null;
 
-    String result_1 = suit.createMessage(new char[]{'a', 'b', 'c'});
-    String result_2 = suit.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
-    String result_3 = suit.createMessage(new char[]{'T', 'u', 'r', 't', 'l', 'e'});
+    String result_1 = sut.createMessage(new char[]{'a', 'b', 'c'});
+    String result_2 = sut.createMessage(new char[]{'H', 'e', 'l', 'l', 'o'});
+    String result_3 = sut.createMessage(new char[]{'T', 'u', 'r', 't', 'l', 'e'});
 
     assertEquals("abc", result_1);
     assertEquals("Hello", result_2);
@@ -37,22 +37,22 @@ public class Homework01 {
   private interface Test02 {
 
     /**
-     * Check reverse word exm: "word" == "drow" -> false exm2: "eye" == "eye"  -> true
+     * Check if word is palindrome exm: "word" == "drow" -> false exm2: "eye" == "eye"  -> true
      */
     boolean isReversedStringTheSame(String word);
   }
 
   @Test
-  public void reversedWord() {
+  public void isWordPalindrome() {
     //TODO: create your realization with lambda
-    Test02 suit = null;
+    Test02 sut = null;
 
-    boolean result_1 = suit.isReversedStringTheSame("abccba");
-    boolean result_2 = suit.isReversedStringTheSame("level");
-    boolean result_3 = suit.isReversedStringTheSame("cow");
-    boolean result_4 = suit.isReversedStringTheSame("radar");
-    boolean result_5 = suit.isReversedStringTheSame("mellow");
-    boolean result_6 = suit.isReversedStringTheSame("madam");
+    boolean result_1 = sut.isReversedStringTheSame("abccba");
+    boolean result_2 = sut.isReversedStringTheSame("level");
+    boolean result_3 = sut.isReversedStringTheSame("cow");
+    boolean result_4 = sut.isReversedStringTheSame("radar");
+    boolean result_5 = sut.isReversedStringTheSame("mellow");
+    boolean result_6 = sut.isReversedStringTheSame("madam");
 
     assertTrue(result_1);
     assertTrue(result_2);
@@ -107,17 +107,18 @@ public class Homework01 {
     //TODO: create your realization with lambda
     Summarizer increment = null;
 
-    Counter suit_1 = new Counter(transform, increment);
-    Counter suit_2 = new Counter(transform, increment);
-    Counter suit_3 = new Counter(transform, increment);
+    Counter sut_1 = new Counter(transform, increment);
+    Counter sut_2 = new Counter(transform, increment);
+    Counter sut_3 = new Counter(transform, increment);
 
-    assertEquals(5, suit_1.getSum("3", "2"));
-    assertEquals(10, suit_2.getSum("5", "5"));
-    assertEquals(57, suit_3.getSum("24", "33"));
+    assertEquals(5, sut_1.getSum("3", "2"));
+    assertEquals(10, sut_2.getSum("5", "5"));
+    assertEquals(57, sut_3.getSum("24", "33"));
   }
 
   @Test
-  public void sortByNameDistinct() {
+  public void sortByNameLength() {
+
     String[] names = {"Fred", "Maggy", "Suzan", "Loid", "Nir", "Lo", "Stefan", "Maximilian"};
 
     //TODO: Write Comparator realization with lambda expression
