@@ -3,11 +3,19 @@ package com.make.my.day.hm5;
 import javafx.util.Pair;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -19,14 +27,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class MergeSortJoinTest {
     @Test
     public void spliteratorTest() {
-        Stream<String> left = Arrays.stream("a b c c o f g h k l".split(" "));
-        Stream<String> right = Arrays.stream("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
+        List<String> listLeft = Arrays.asList("a b c c o f g h k l".split(" "));
+        Collections.shuffle(listLeft);
+        Stream<String> left = listLeft.stream();
+        List<String> listRight = Arrays.asList("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
+        Collections.shuffle(listRight);
+        Stream<String> right = listRight.stream();
 
-        List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+        Set<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
                 right, Function.identity(), s -> s.substring(0, 1)), false)
                 .map(pair -> pair.getKey() + " " + pair.getValue())
-                .collect(Collectors.toList());
-        List<String> expected = Arrays.asList(
+                .collect(Collectors.toSet());
+        Set<String> expected = Stream.of(
                 "a aa",
                 "b bb",
                 "c cc",
@@ -43,7 +55,7 @@ public class MergeSortJoinTest {
                 "g gg",
                 "h hh",
                 "k kk"
-        );
+        ).collect(Collectors.toSet());
 
         assertThat("Incorrect result", result, is(expected));
     }
