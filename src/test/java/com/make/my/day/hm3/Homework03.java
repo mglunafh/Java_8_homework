@@ -129,8 +129,8 @@ public class Homework03 {
 
       Map<Integer, Integer> charLengths = s.toLowerCase().chars().mapToObj(x -> x)
           .collect(HashMap::new,
-          (Map<Integer, Integer> map, Integer ch) -> map
-              .put(ch, map.containsKey(ch) ? map.get(ch) + 1 : 1),
+          (Map<Integer, Integer> map, Integer ch) ->
+              map.merge(ch, 1, (valFirst, valSec) -> valFirst + valSec ),
               Map::putAll);
 
       return charLengths.values().stream().max(Integer::compareTo).orElse(0);
@@ -153,7 +153,7 @@ public class Homework03 {
 
     // TODO: Uncomment and add correct realization of flatMap 
     String bigString = Arrays.stream(words)
-//        .flatMap(x -> x)
+//        .flatMap(x -> x.chars())
         .collect(Collectors.joining());
 
     assertEquals("Hello wonderful world!", bigString);

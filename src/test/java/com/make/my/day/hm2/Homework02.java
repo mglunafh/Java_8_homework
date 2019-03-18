@@ -22,11 +22,13 @@ public class Homework02 {
   @Test
   public void concatenateChars() {
 
-    Function<Character[], String> charConcatenator = (arr) -> 
-      Arrays.stream(arr)
-          .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-          .toString()
-      ;
+    Function<Character[], String> charConcatenator = (arr) ->  {
+      StringBuilder sb = new StringBuilder();
+      for (Character ch : arr) {
+        sb.append(ch);
+      }
+      return sb.toString();
+    };
 
     String result_1 = charConcatenator.apply(new Character[]{'a', 'b', 'c'});
     String result_2 = charConcatenator.apply(new Character[]{'H', 'e', 'l', 'l', 'o'});
@@ -80,7 +82,7 @@ public class Homework02 {
 
     Function<String, Integer> transform = Integer::parseInt;
 
-    BinaryOperator<Integer> increment = (n, m) -> n + m;
+    BinaryOperator<Integer> increment = Integer::sum;
 
     Counter sut_1 = new Counter(transform, increment);
     Counter sut_2 = new Counter(transform, increment);
@@ -182,10 +184,7 @@ public class Homework02 {
   }
 
   private static Function<Predicate<String>, Function<String, String>> doubleStringOrAddThreeDots() {
-    return (Predicate<String> pred) -> {
-      return 
-          ((String s) -> pred.test(s) ? (s + s) : (s + "...")); 
-    }; 
+    return (Predicate<String> pred) -> ((String s) -> pred.test(s) ? (s + s) : (s + "..."));
   }
 
   //TODO: implement, return word length from function
