@@ -152,14 +152,14 @@ public class Homework03 {
     String[] words = new String[]{"Hel", "lo", " won", "der", "ful", " ","world", "!"};
 
     // TODO: Uncomment and add correct realization of flatMap 
-    //we don't need flat map here for Collectors.joining()
-    //String bigString = Arrays.stream(words)
-    //   .collect(Collectors.joining());
+    String bigString = Arrays.stream(words)
+       .flatMap(word -> Stream.of(word.split("")))
+       .collect(Collectors.joining());
 
     // alternative realization with flat map:
-    String bigString = Arrays.stream(words)
-            .flatMap(word -> word.chars().mapToObj(c -> (char)c))
-            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+//     String bigString = Arrays.stream(words)
+//            .flatMap(word -> word.chars().mapToObj(c -> (char)c))
+//            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
 
     assertEquals("Hello wonderful world!", bigString);
   }
