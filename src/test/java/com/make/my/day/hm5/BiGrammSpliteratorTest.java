@@ -1,5 +1,7 @@
 package com.make.my.day.hm5;
 
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -20,7 +22,7 @@ public class BiGrammSpliteratorTest {
     public void biGramSplitTest() throws Exception {
         List<String> tokens = Arrays.asList("I should never try to implement my own spliterator".split(" "));
 
-        Set<String> result = StreamSupport.stream(new BigrammSpliterator(tokens, " "), true)
+        Set<String> result = StreamSupport.stream(new BigramSpliterator(tokens, " "), true)
                 .collect(Collectors.toSet());
 
         Set<String> expected = Arrays.stream(new String[]{
@@ -42,12 +44,12 @@ public class BiGrammSpliteratorTest {
     public void biGramSplitTestSplit() throws Exception {
         List<String> tokens = Arrays.asList("I should never try to implement my own spliterator".split(" "));
 
-        BigrammSpliterator biGrammSpliterator = new BigrammSpliterator(tokens, " ");
-        BigrammSpliterator biGramSpliterator1 = biGrammSpliterator.trySplit();
+        BigramSpliterator biGrammSpliterator = new BigramSpliterator(tokens, " ");
+        BigramSpliterator biGramSpliterator1 = biGrammSpliterator.trySplit();
 
         assertThat("Spliterator 1 is null", biGramSpliterator1, notNullValue());
 
-        BigrammSpliterator biGramSpliterator2 = biGramSpliterator1.trySplit();
+        BigramSpliterator biGramSpliterator2 = biGramSpliterator1.trySplit();
 
         assertThat("Spliterator 2 is null", biGramSpliterator2, notNullValue());
         Consumer<String> consumer = (String s) -> {
@@ -75,36 +77,64 @@ public class BiGrammSpliteratorTest {
 
     }
 
-    class BigrammSpliterator implements Spliterator<String> {
-        //ToDo: Write your own bi-gram spliterator
-        //Todo: Should works in parallel
+    class BigramSpliterator implements Spliterator<String> {
 
+        private List<String> source;
+        private String delimiter;
+        private AtomicInteger current;
+        private int to;
         /**
          * Read about bi and n-grams https://en.wikipedia.org/wiki/N-gram.
          *
          * @param source
          */
-        public BigrammSpliterator(List<String> source, String delimeter) {
+        public BigramSpliterator(List<String> source, String delimiter) {
+            this.source = source;
+            this.delimiter = delimiter;
+            current = new AtomicInteger(0);
         }
 
         @Override
         public boolean tryAdvance(Consumer<? super String> action) {
-            return false;
+
+            if (current.get() < source.size() - 1) {
+
+                String first = source.get(current.getAndIncrement());
+                String second = source.get(current.get());
+
+                String strResult = first + delimiter + second;
+                action.accept(strResult);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
 
         @Override
-        public BigrammSpliterator trySplit() {
-            return null;
+        public BigramSpliterator trySplit() {
+
+            if (estimateSize() < 2)
+                return  null;
+
+            int middle = (source.size() - current.get()) / 2;
+
+            List<String> subList = source.subList(current.get(), current.get() + middle + 1);
+
+            BigramSpliterator another = new BigramSpliterator(subList, delimiter);
+            current.set(middle);
+
+            return another;
         }
 
         @Override
         public long estimateSize() {
-            return 0;
+            return source.size() - current.get();
         }
 
         @Override
         public int characteristics() {
-            return 0;
+            return  source.stream().spliterator().characteristics() & (SIZED | SUBSIZED | CONCURRENT | IMMUTABLE | ORDERED);
         }
     }
 

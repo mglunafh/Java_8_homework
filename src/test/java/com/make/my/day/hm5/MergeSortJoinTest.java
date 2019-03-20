@@ -71,10 +71,16 @@ public class MergeSortJoinTest {
 
     //ToDo: Implement your own merge sort inner join spliterator. See https://en.wikipedia.org/wiki/Sort-merge_join
     public static class MergeSortInnerJoinSpliterator<C extends Comparable<C>, L, R> implements Spliterator<Pair<L, R>> {
+
+        private Stream<L> left;
+        private Stream<R> right;
+
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
                                              Function<L, C> keyExtractorLeft,
                                              Function<R, C> keyExtractorRight) {
+            this.left = left;
+            this.right = right;
         }
 
         @Override
@@ -89,6 +95,7 @@ public class MergeSortJoinTest {
 
         @Override
         public long estimateSize() {
+
             return 0;
         }
 
