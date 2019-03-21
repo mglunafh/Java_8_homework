@@ -35,7 +35,7 @@ public class MergeSortJoinTest {
         Stream<String> right = listRight.stream();
 
         Set<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
-                right, Function.identity(), s -> s.substring(0, 1)), false)
+                right, Function.identity(), s -> s.substring(0, 1), false), false)
                 .map(pair -> pair.getKey() + " " + pair.getValue())
                 .collect(Collectors.toSet());
         Set<String> expected = Stream.of(
@@ -66,7 +66,7 @@ public class MergeSortJoinTest {
         Stream<String> right = Arrays.stream("0x 1a 2b 3c 4e 5g 9l".split(" "));
 
         List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
-                right, String::valueOf, s -> s.substring(0, 1)), false)
+                right, String::valueOf, s -> s.substring(0, 1), false), false)
                 .map(pair -> pair.getKey() + " " + pair.getValue())
                 .collect(Collectors.toList());
         List<String> expected = Arrays.asList(
@@ -81,12 +81,25 @@ public class MergeSortJoinTest {
         assertThat("Incorrect result", result, is(expected));
     }
 
+
+    @Test
+    public void spliteratorMemoryTest() {
+        Stream<Integer> left = IntStream.iterate(1, i -> i + 1).limit(Integer.MAX_VALUE >> 2).boxed();
+        Stream<Integer> right = IntStream.iterate(1, i -> i + 1).limit(Integer.MAX_VALUE >> 2).boxed();
+
+        long count = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+                right, Function.identity(), Function.identity(), true), false)
+                .count();
+        assertThat("Incorrect result", count, is(Integer.MAX_VALUE >> 2));
+    }
+
     //ToDo: Implement your own merge sort inner join spliterator. See https://en.wikipedia.org/wiki/Sort-merge_join
     public static class MergeSortInnerJoinSpliterator<C extends Comparable<C>, L, R> implements Spliterator<Pair<L, R>> {
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
                                              Function<L, C> keyExtractorLeft,
-                                             Function<R, C> keyExtractorRight) {
+                                             Function<R, C> keyExtractorRight,
+                                             boolean isSorted) {
         }
 
         @Override
