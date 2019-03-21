@@ -114,12 +114,13 @@ public class BiGrammSpliteratorTest {
         @Override
         public BigramSpliterator trySplit() {
 
-            if (estimateSize() < 2)
+            if (estimateSize() <= 2)
                 return  null;
 
-            int middle = (source.size() - current.get()) / 2;
+            int halfOfRemained = (source.size() - current.get()) / 2;
+            int middle = current.get() + halfOfRemained;
 
-            List<String> subList = source.subList(current.get(), current.get() + middle + 1);
+            List<String> subList = source.subList(current.get(), middle + 1);
 
             BigramSpliterator another = new BigramSpliterator(subList, delimiter);
             current.set(middle);
@@ -137,6 +138,4 @@ public class BiGrammSpliteratorTest {
             return  source.stream().spliterator().characteristics() & (SIZED | SUBSIZED | CONCURRENT | IMMUTABLE | ORDERED);
         }
     }
-
-
 }
