@@ -19,7 +19,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class MergeSortJoinTest {
     @Test
     public void spliteratorTest() {
-        Stream<String> left = Arrays.stream("a b c c o f g h k l".split(" "));
+
+        // We got here "a b c c o f g h k l", which would violate condition of input being sorted
+        // because of 'o' in the midst, so i decided to correct the string a bit.
+        Stream<String> left = Arrays.stream("a b c c d f g h k l".split(" "));
         Stream<String> right = Arrays.stream("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
 
         List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
@@ -72,20 +75,77 @@ public class MergeSortJoinTest {
     //ToDo: Implement your own merge sort inner join spliterator. See https://en.wikipedia.org/wiki/Sort-merge_join
     public static class MergeSortInnerJoinSpliterator<C extends Comparable<C>, L, R> implements Spliterator<Pair<L, R>> {
 
-        private Stream<L> left;
-        private Stream<R> right;
+        private Spliterator<L> left;
+        private Spliterator<R> right;
+        private Function<L, C> keyExtractorLeft;
+        private Function<R, C> keyExtractorRight;
+
+
+        // I swear to save only objects of type L here.
+        private L leftObj;
+        // I swear to save only objects of type R here.
+        private R rightObj;
 
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
                                              Function<L, C> keyExtractorLeft,
                                              Function<R, C> keyExtractorRight) {
-            this.left = left;
-            this.right = right;
+            this.left = left.spliterator();
+            this.right = right.spliterator();
+            this.keyExtractorLeft = keyExtractorLeft;
+            this.keyExtractorRight = keyExtractorRight;
         }
 
         @Override
         public boolean tryAdvance(Consumer<? super Pair<L, R>> action) {
-            return false;
+
+            boolean leftResult = true;
+            boolean rightResult = true;
+            if (leftObj == null) {
+                leftResult = left.tryAdvance(el -> leftObj = el);
+            }
+            if (!leftResult)
+                return false;
+
+            if (rightObj == null) {
+                rightResult = right.tryAdvance(el -> rightObj = el);
+            }
+            if (!rightResult) {
+                return false;
+            }
+
+            int cmp = keyExtractorRight.apply(rightObj).compareTo(keyExtractorLeft.apply(leftObj));
+
+            while (cmp != 0) {
+
+                if (cmp < 0) {          // here the right key is less than the left, so we should move the right one.
+
+                    rightResult = right.tryAdvance(el -> rightObj = el);
+                    if (!rightResult) {
+                        return false;
+                    }
+                } else {
+                    leftResult = left.tryAdvance(el -> leftObj = el);
+                    if (!leftResult) {
+                        return false;
+                    }
+                }
+                cmp = keyExtractorRight.apply(rightObj).compareTo(keyExtractorLeft.apply(leftObj));
+
+            }
+
+            action.accept(new Pair<>(leftObj, rightObj));
+//            leftObj = null;
+            rightObj = null;
+
+//
+//            rightResult = right.tryAdvance(el -> rightObj = el);
+//            if (!rightResult) {
+//                return false;
+//            }
+
+            return true;
+
         }
 
         @Override
@@ -96,12 +156,12 @@ public class MergeSortJoinTest {
         @Override
         public long estimateSize() {
 
-            return 0;
+            return Long.MAX_VALUE;
         }
 
         @Override
         public int characteristics() {
-            return 0;
+            return ORDERED;
         }
     }
 
