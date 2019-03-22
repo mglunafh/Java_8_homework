@@ -1,5 +1,7 @@
 package com.make.my.day.hm5;
 
+import java.util.Collections;
+import java.util.HashSet;
 import javafx.util.Pair;
 import org.junit.Test;
 
@@ -20,16 +22,20 @@ public class MergeSortJoinTest {
     @Test
     public void spliteratorTest() {
 
-        // We got here "a b c c o f g h k l", which would violate condition of input being sorted
-        // because of 'o' in the midst, so i decided to correct the string a bit.
-        Stream<String> left = Arrays.stream("a b c c d f g h k l".split(" "));
-        Stream<String> right = Arrays.stream("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
+      // We got here "a b c c o f g h k l", which would violate condition of input being sorted
+      // because of 'o' in the midst, so i decided to correct the string a bit.
+      List<String> listLeft = Arrays.asList("a b c c o f g h k l".split(" "));
+        Collections.shuffle(listLeft);
+        Stream<String> left = listLeft.stream();
+        List<String> listRight = Arrays.asList("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
+        Collections.shuffle(listRight);
+        Stream<String> right = listRight.stream();
 
         List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
-                right, Function.identity(), s -> s.substring(0, 1)), false)
+                right, Function.identity(), s -> s.substring(0, 1), false), false)
                 .map(pair -> pair.getKey() + " " + pair.getValue())
                 .collect(Collectors.toList());
-        List<String> expected = Arrays.asList(
+        List<String> expected = Stream.of(
                 "a aa",
                 "b bb",
                 "c cc",
@@ -46,9 +52,17 @@ public class MergeSortJoinTest {
                 "g gg",
                 "h hh",
                 "k kk"
-        );
+        ).collect(Collectors.toList());
 
-        assertThat("Incorrect result", result, is(expected));
+        assertThat("Incorrect result", new HashSet<>(result), is(new HashSet<>(expected)));
+        assertThat("Incorrect result order",
+                result.stream()
+                        .map(s -> s.substring(0,3))
+                        .collect(Collectors.toList()),
+                is(expected.stream()
+                        .map(s -> s.substring(0,3))
+                        .collect(Collectors.toList()))
+                );
     }
 
     @Test
@@ -57,7 +71,7 @@ public class MergeSortJoinTest {
         Stream<String> right = Arrays.stream("0x 1a 2b 3c 4e 5g 9l".split(" "));
 
         List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
-                right, String::valueOf, s -> s.substring(0, 1)), false)
+                right, String::valueOf, s -> s.substring(0, 1), false), false)
                 .map(pair -> pair.getKey() + " " + pair.getValue())
                 .collect(Collectors.toList());
         List<String> expected = Arrays.asList(
@@ -70,6 +84,18 @@ public class MergeSortJoinTest {
         );
 
         assertThat("Incorrect result", result, is(expected));
+    }
+
+
+    @Test
+    public void spliteratorMemoryTest() {
+        Stream<Integer> left = IntStream.iterate(1, i -> i + 1).limit(Integer.MAX_VALUE >> 2).boxed();
+        Stream<Integer> right = IntStream.iterate(1, i -> i + 1).limit(Integer.MAX_VALUE >> 2).boxed();
+
+        long count = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+                right, Function.identity(), Function.identity(), true), false)
+                .count();
+        assertThat("Incorrect result", count, is((long)(Integer.MAX_VALUE >> 2)));
     }
 
     //ToDo: Implement your own merge sort inner join spliterator. See https://en.wikipedia.org/wiki/Sort-merge_join
@@ -89,7 +115,8 @@ public class MergeSortJoinTest {
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
                                              Function<L, C> keyExtractorLeft,
-                                             Function<R, C> keyExtractorRight) {
+                                             Function<R, C> keyExtractorRight,
+                                             boolean isSorted)  {
             this.left = left.spliterator();
             this.right = right.spliterator();
             this.keyExtractorLeft = keyExtractorLeft;
