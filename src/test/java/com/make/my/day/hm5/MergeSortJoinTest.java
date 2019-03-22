@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,11 +35,11 @@ public class MergeSortJoinTest {
         Collections.shuffle(listRight);
         Stream<String> right = listRight.stream();
 
-        Set<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+        List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
                 right, Function.identity(), s -> s.substring(0, 1), false), false)
                 .map(pair -> pair.getKey() + " " + pair.getValue())
-                .collect(Collectors.toSet());
-        Set<String> expected = Stream.of(
+                .collect(Collectors.toList());
+        List<String> expected = Stream.of(
                 "a aa",
                 "b bb",
                 "c cc",
@@ -55,9 +56,17 @@ public class MergeSortJoinTest {
                 "g gg",
                 "h hh",
                 "k kk"
-        ).collect(Collectors.toSet());
+        ).collect(Collectors.toList());
 
-        assertThat("Incorrect result", result, is(expected));
+        assertThat("Incorrect result", new HashSet<>(result), is(new HashSet<>(expected)));
+        assertThat("Incorrect result order",
+                result.stream()
+                        .map(s -> s.substring(0,3))
+                        .collect(Collectors.toList()),
+                is(expected.stream()
+                        .map(s -> s.substring(0,3))
+                        .collect(Collectors.toList()))
+                );
     }
 
     @Test
