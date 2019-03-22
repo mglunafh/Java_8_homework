@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.Test;
 
 public class Homework04 {
@@ -170,7 +168,8 @@ public class Homework04 {
         new Dog("Bim", 4), new Dog("Duke", 7), new Dog("Fenrir", 120));
 
     //TODO: make you'r realization
-    Map<Boolean, List<Dog>> result = dogs.stream().collect(Collectors.partitioningBy(dog -> dog.getAge() % 2 == 0));
+    Map<Boolean, List<Dog>> result = dogs.stream()
+        .collect(Collectors.partitioningBy(dog -> dog.getAge() % 2 == 0));
 
     Map<Boolean, List<Dog>> expected = new HashMap<>();
     expected.put(true, Arrays.asList(new Dog("Bim", 4), new Dog("Fenrir", 120)));
@@ -179,11 +178,12 @@ public class Homework04 {
     assertEquals(expected, result);
   }
 
-  private enum Role{
+  private enum Role {
     ADMIN, USER, MANAGER
   }
 
-  private class User{
+  private class User {
+
     private String email;
     private Role role;
 
@@ -201,7 +201,8 @@ public class Homework04 {
     }
   }
 
-  private class UserDTO{
+  private class UserDTO {
+
     private String email;
 
     private List<Role> roles;
@@ -258,17 +259,19 @@ public class Homework04 {
         new User("sonofsun@epam.com", Role.MANAGER)
     );
 
-    Map<String, List<Role>> collect = usersFromDB.stream()
-        .collect(Collectors.groupingBy(
+    List<UserDTO> userDTOS = usersFromDB.stream()
+        .collect(Collectors.collectingAndThen(Collectors.groupingBy(
             (User user) -> user.getEmail(),
-            Collectors.mapping((User user) -> user.getRole(), Collectors.toList())));
-
-
-    //TODO: Make your realization
-    List<UserDTO> result = new ArrayList<>(collect.size());
-    for (String email : collect.keySet()) {
-      result.add(new UserDTO(email, collect.get(email)));
-    }
+            Collectors.mapping((User user) -> user.getRole(), Collectors.toList())),
+            map -> {
+              List<UserDTO> result = new ArrayList<>(map.size());
+              for (String email : map.keySet()) {
+                result.add(new UserDTO(email, map.get(email)));
+              }
+              return result;
+            }
+            )
+        );
 
     List<UserDTO> expected = Arrays.asList(
         new UserDTO("someone@epam.com", Arrays.asList(Role.USER)),
@@ -276,6 +279,6 @@ public class Homework04 {
         new UserDTO("superman@epam.com", Arrays.asList(Role.ADMIN, Role.USER, Role.MANAGER))
     );
 
-    assertEquals(expected, result);
+    assertEquals(expected, userDTOS);
   }
 }
