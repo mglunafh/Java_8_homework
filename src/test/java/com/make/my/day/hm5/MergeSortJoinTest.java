@@ -1,7 +1,10 @@
 package com.make.my.day.hm5;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Optional;
 import javafx.util.Pair;
 import org.junit.Test;
 
@@ -22,8 +25,6 @@ public class MergeSortJoinTest {
     @Test
     public void spliteratorTest() {
 
-      // We got here "a b c c o f g h k l", which would violate condition of input being sorted
-      // because of 'o' in the midst, so i decided to correct the string a bit.
       List<String> listLeft = Arrays.asList("a b c c o f g h k l".split(" "));
         Collections.shuffle(listLeft);
         Stream<String> left = listLeft.stream();
@@ -106,73 +107,70 @@ public class MergeSortJoinTest {
         private Function<L, C> keyExtractorLeft;
         private Function<R, C> keyExtractorRight;
 
+        private CartesianProduct<L, R> product;
 
         // I swear to save only objects of type L here.
         private L leftObj;
+        private Consumer<L> setterLeft = t -> leftObj = t;
+
         // I swear to save only objects of type R here.
         private R rightObj;
+        private Consumer<R> setterRight = t -> rightObj = t;
 
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
                                              Function<L, C> keyExtractorLeft,
                                              Function<R, C> keyExtractorRight,
                                              boolean isSorted)  {
-            this.left = left.spliterator();
-            this.right = right.spliterator();
+            if (!isSorted) {
+                this.left = left.sorted(Comparator.comparing(keyExtractorLeft::apply)).spliterator();
+                this.right = right.sorted(Comparator.comparing(keyExtractorRight::apply)).spliterator();
+            }
+            else {
+                this.left = left.spliterator();
+                this.right = right.spliterator();
+            }
+
             this.keyExtractorLeft = keyExtractorLeft;
             this.keyExtractorRight = keyExtractorRight;
+
+            this.left.tryAdvance(t -> leftObj = t);
+            this.right.tryAdvance(t -> rightObj = t);
         }
 
         @Override
         public boolean tryAdvance(Consumer<? super Pair<L, R>> action) {
 
-            boolean leftResult = true;
-            boolean rightResult = true;
-            if (leftObj == null) {
-                leftResult = left.tryAdvance(el -> leftObj = el);
-            }
-            if (!leftResult)
-                return false;
-
-            if (rightObj == null) {
-                rightResult = right.tryAdvance(el -> rightObj = el);
-            }
-            if (!rightResult) {
-                return false;
-            }
-
-            int cmp = keyExtractorRight.apply(rightObj).compareTo(keyExtractorLeft.apply(leftObj));
-
-            while (cmp != 0) {
-
-                if (cmp < 0) {          // here the right key is less than the left, so we should move the right one.
-
-                    rightResult = right.tryAdvance(el -> rightObj = el);
-                    if (!rightResult) {
-                        return false;
-                    }
-                } else {
-                    leftResult = left.tryAdvance(el -> leftObj = el);
-                    if (!leftResult) {
-                        return false;
-                    }
+            if (product == null || !product.tryAdvance(action)) {
+                List<L> listLeft = advanceKeyLeft();
+                if (listLeft == null) {
+                  return false;
                 }
-                cmp = keyExtractorRight.apply(rightObj).compareTo(keyExtractorLeft.apply(leftObj));
+                List<R> listRight = advanceKeyRight();
+                if (listRight == null) {
+                  return false;
+                }
 
+                int cmp = keyExtractorLeft.apply(listLeft.get(0)).compareTo(keyExtractorRight.apply(listRight.get(0)));
+                while (cmp != 0) {
+                    if (cmp < 0) {
+                        listLeft = advanceKeyLeft();
+                        if (listLeft == null) {
+                            return  false;
+                        }
+                    } else {
+                        listRight = advanceKeyRight();
+                        if (listRight == null) {
+                            return false;
+                        }
+                    }
+                    cmp = keyExtractorLeft.apply(listLeft.get(0)).compareTo(keyExtractorRight.apply(listRight.get(0)));
+                }
+
+                product = new CartesianProduct<>(listLeft, listRight);
+                product.tryAdvance(action);
             }
-
-            action.accept(new Pair<>(leftObj, rightObj));
-//            leftObj = null;
-            rightObj = null;
-
-//
-//            rightResult = right.tryAdvance(el -> rightObj = el);
-//            if (!rightResult) {
-//                return false;
-//            }
-
             return true;
-
         }
 
         @Override
@@ -182,13 +180,93 @@ public class MergeSortJoinTest {
 
         @Override
         public long estimateSize() {
-
             return Long.MAX_VALUE;
         }
 
         @Override
         public int characteristics() {
             return ORDERED;
+        }
+
+        /**
+         * This method returns a sequence of elements from the left stream that have the same key.
+         * @return
+         */
+        private List<L> advanceKeyLeft() {
+
+          // In spliterator constructor we tried to set 'leftObj' value.
+          // It is null, if the left stream is empty or has ended.
+            if (leftObj == null) {
+                return null;
+            }
+            L initial = leftObj;
+            List<L> list = new ArrayList<>();
+            int cmp = 0;
+            while (cmp == 0) {
+                list.add(leftObj);
+
+                if (left.tryAdvance(setterLeft)) {
+                  cmp = keyExtractorLeft.apply(initial).compareTo(keyExtractorLeft.apply(leftObj));
+                } else {
+                  leftObj = null;
+                  break;
+                }
+            }
+
+            return list;
+        }
+
+        /**
+         * This method returns a sequence of elements from the right stream that have the same key.
+         * @return
+         */
+        private List<R> advanceKeyRight() {
+
+            // In spliterator constructor we tried to set 'rightObj' value.
+            // It is null, if the right stream is empty or has ended.
+            if (rightObj == null) {
+                return null;
+            }
+            R initial = rightObj;
+            List<R> list = new ArrayList<>();
+            int cmp = 0;
+            while (cmp == 0) {
+                list.add(rightObj);
+                if (right.tryAdvance(setterRight)) {
+                    cmp = keyExtractorRight.apply(initial).compareTo(keyExtractorRight.apply(rightObj));
+                } else {
+                    rightObj = null;
+                    break;
+                }
+            }
+
+            return list;
+        }
+
+        static class CartesianProduct<L, R> {
+
+            private final List<L> left;
+            private final List<R> right;
+            private int counterLeft;
+            private int counterRight;
+
+            CartesianProduct(List<L> left, List<R> right) {
+                this.left = left;
+                this.right = right;
+            }
+
+            boolean tryAdvance(Consumer<? super Pair<L, R>> action) {
+                if (counterLeft < left.size()) {
+                    action.accept(new Pair<>(left.get(counterLeft), right.get(counterRight)));
+                    if (++counterRight == right.size()) {
+                        counterLeft++;
+                        counterRight = 0;
+                    }
+                    return true;
+                }
+                else
+                    return false;
+            }
         }
     }
 
