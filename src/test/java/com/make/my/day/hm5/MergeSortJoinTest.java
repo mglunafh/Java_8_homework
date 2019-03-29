@@ -103,20 +103,20 @@ public class MergeSortJoinTest {
     //ToDo: Implement your own merge sort inner join spliterator. See https://en.wikipedia.org/wiki/Sort-merge_join
     public static class MergeSortInnerJoinSpliterator<C extends Comparable<C>, L, R> implements Spliterator<Pair<L, R>> {
 
-        private Spliterator<L> left;
-        private Spliterator<R> right;
-        private Function<L, C> keyExtractorLeft;
-        private Function<R, C> keyExtractorRight;
+        private final Spliterator<L> left;
+        private final Spliterator<R> right;
+        private final Function<L, C> keyExtractorLeft;
+        private final Function<R, C> keyExtractorRight;
 
         private CartesianProduct<L, R> product;
 
-        // I swear to save only objects of type L here.
+        // elements popped from the left stream will be stored here
         private L leftObj;
-        private Consumer<L> setterLeft = t -> leftObj = t;
-
-        // I swear to save only objects of type R here.
+        private final Consumer<L> setterLeft = t -> leftObj = t;
+        
+        // elements popped from the right stream will be stored here
         private R rightObj;
-        private Consumer<R> setterRight = t -> rightObj = t;
+        private final Consumer<R> setterRight = t -> rightObj = t;
 
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
@@ -135,8 +135,8 @@ public class MergeSortJoinTest {
             this.keyExtractorLeft = keyExtractorLeft;
             this.keyExtractorRight = keyExtractorRight;
 
-            this.left.tryAdvance(t -> leftObj = t);
-            this.right.tryAdvance(t -> rightObj = t);
+            this.left.tryAdvance(setterLeft);
+            this.right.tryAdvance(setterRight);
         }
 
         @Override
@@ -152,7 +152,8 @@ public class MergeSortJoinTest {
                   return false;
                 }
 
-                int cmp = keyExtractorLeft.apply(listLeft.get(0)).compareTo(keyExtractorRight.apply(listRight.get(0)));
+                int cmp = keyExtractorLeft.apply(listLeft.get(0))
+                    .compareTo(keyExtractorRight.apply(listRight.get(0)));
                 while (cmp != 0) {
                     if (cmp < 0) {
                         listLeft = advanceKeyLeft();
@@ -165,7 +166,8 @@ public class MergeSortJoinTest {
                             return false;
                         }
                     }
-                    cmp = keyExtractorLeft.apply(listLeft.get(0)).compareTo(keyExtractorRight.apply(listRight.get(0)));
+                    cmp = keyExtractorLeft.apply(listLeft.get(0))
+                        .compareTo(keyExtractorRight.apply(listRight.get(0)));
                 }
 
                 product = new CartesianProduct<>(listLeft, listRight);
@@ -190,8 +192,10 @@ public class MergeSortJoinTest {
         }
 
         /**
-         * This method returns a sequence of elements from the left stream that have the same key.
-         * @return
+         * This method returns a sequence of elements 
+         * from the left stream that have the same key.
+         * @return list of elements with the same key or 
+         * {@code null} if no nore elements left.
          */
         private List<L> advanceKeyLeft() {
 
@@ -213,13 +217,14 @@ public class MergeSortJoinTest {
                   break;
                 }
             }
-
             return list;
         }
 
         /**
-         * This method returns a sequence of elements from the right stream that have the same key.
-         * @return
+         * This method returns a sequence of elements from 
+         * the right stream that have the same key.
+         * @return list of elements with the same key or 
+         * {@code null} if no nore elements left.
          */
         private List<R> advanceKeyRight() {
 
@@ -240,10 +245,16 @@ public class MergeSortJoinTest {
                     break;
                 }
             }
-
             return list;
         }
 
+        /**
+         * This class represents cartesian product of two lists that 
+         * satisfy certain join condition.
+         * You can fetch 
+         * @param <L>
+         * @param <R> 
+         */
         static class CartesianProduct<L, R> {
 
             private final List<L> left;
@@ -270,5 +281,4 @@ public class MergeSortJoinTest {
             }
         }
     }
-
 }
