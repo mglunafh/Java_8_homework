@@ -1,18 +1,18 @@
 package com.make.my.day.hm5;
 
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.Test;
 
 public class BiGrammSpliteratorTest {
 
@@ -84,27 +84,65 @@ public class BiGrammSpliteratorTest {
          *
          * @param source
          */
+        private final  List<String> source;
+        private String delimeter;
+
+        //thread-safe saving current position/index
+        private AtomicInteger currentPosition = new AtomicInteger(0);
+
         public BigrammSpliterator(List<String> source, String delimeter) {
+        this.source = source;
+        this.delimeter = delimeter;
         }
 
         @Override
         public boolean tryAdvance(Consumer<? super String> action) {
-            return false;
+
+          //check if it's not the one before last element so we can iterate to get new pair
+          if (estimateSize() > 1) {
+            String leftPart = source.get(currentPosition.getAndIncrement());
+            String rightPart = source.get(currentPosition.get());
+
+            //just send through this consumer new pair that we need to collect later
+            action.accept(leftPart + delimeter + rightPart);
+            return true;
+          }
+
+          //return false if "current position" and next element create the last pair for this spliterator
+          return false;
         }
 
         @Override
         public BigrammSpliterator trySplit() {
+
+          //won't split if we have less than 3 element (only one pair left)
+          if (estimateSize() < 3) {
             return null;
+          }
+
+          //getting an offset to reach the center of the remaining part from current position
+          int offset = (source.size() - currentPosition.get())/2;
+
+          //getting index of the center of the remaining part
+          int centerOfRemainingPart = currentPosition.get() + offset;
+
+          //creating new BigrammSpliterator as part of the current source from the current position to
+          //the center of remaining part (add 1 to avoid cutting of result and make the full last pair )
+          BigrammSpliterator newBigrammSpliterator = new BigrammSpliterator(this.source.subList(currentPosition.get(), centerOfRemainingPart + 1), delimeter);
+
+          //after every new split new currentPosition will be at the first elem of prev split
+          currentPosition.set(centerOfRemainingPart);
+          return newBigrammSpliterator;
         }
 
         @Override
         public long estimateSize() {
-            return 0;
+            return source.size() - currentPosition.get();
         }
 
         @Override
         public int characteristics() {
-            return 0;
+            return SIZED | SUBSIZED | ORDERED | IMMUTABLE | CONCURRENT ;
         }
     }
 
