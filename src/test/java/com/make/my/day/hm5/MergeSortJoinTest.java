@@ -1,29 +1,22 @@
 package com.make.my.day.hm5;
 
-import javafx.util.Pair;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import javafx.util.Pair;
+import org.junit.Test;
 
 public class MergeSortJoinTest {
     @Test
@@ -104,31 +97,109 @@ public class MergeSortJoinTest {
 
     //ToDo: Implement your own merge sort inner join spliterator. See https://en.wikipedia.org/wiki/Sort-merge_join
     public static class MergeSortInnerJoinSpliterator<C extends Comparable<C>, L, R> implements Spliterator<Pair<L, R>> {
+
+        private final Stream<L> left;
+        private final Stream<R> right;
+        private final Function<L, C> keyExtractorLeft;
+        private final Function<R, C> keyExtractorRight;
+        private final Iterator<R> rightIterator;
+        private final Iterator<L> leftIterator;
+        private L currentLeftElement;
+        private R currentRightElement;
+        private L nextLeftElement;
+        boolean greaterLeft = false;
+        boolean isFirst = true;
+        boolean isLast = false;
+
+
         public MergeSortInnerJoinSpliterator(Stream<L> left,
                                              Stream<R> right,
                                              Function<L, C> keyExtractorLeft,
                                              Function<R, C> keyExtractorRight,
-                                             boolean isSorted) {
-        }
+                                              boolean isSorted) {
+
+            if (!isSorted) {
+                this.left = left.sorted();
+                this.right = right.sorted();
+                this.leftIterator = this.left.iterator();
+                this.rightIterator = this.right.iterator();
+
+            } else {
+                this.left = left;
+                this.right = right;
+                this.leftIterator = left.iterator();
+                this.rightIterator = right.iterator();
+            }
+
+            this.keyExtractorLeft = keyExtractorLeft;
+            this.keyExtractorRight = keyExtractorRight;
+                    }
 
         @Override
         public boolean tryAdvance(Consumer<? super Pair<L, R>> action) {
+            if (leftIterator.hasNext() || rightIterator.hasNext() || !isLast) {
+                if (leftIterator.hasNext() && rightIterator.hasNext() && isFirst) {
+                    nextLeftElement = leftIterator.next();
+                    currentLeftElement = nextLeftElement;
+                    nextLeftElement = leftIterator.next();
+                    currentRightElement = rightIterator.next();
+                }
+                if (!greaterLeft && !isFirst) {
+                    if (leftIterator.hasNext()) {
+                        currentLeftElement = nextLeftElement;
+                        nextLeftElement = leftIterator.next();
+                    }
+                    else if (!isLast) {
+                        currentLeftElement = nextLeftElement;
+                        nextLeftElement = null;
+                        isLast = true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else if (!isFirst) {
+                    if (rightIterator.hasNext()) {
+                        currentRightElement = rightIterator.next();
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                int cmp = keyExtractorLeft.apply(currentLeftElement)
+                    .compareTo(keyExtractorRight.apply(currentRightElement));
+                if (cmp == 0) {
+                    if (nextLeftElement != null && keyExtractorLeft.apply(currentLeftElement)
+                        .equals(keyExtractorLeft.apply(
+                            nextLeftElement))) {
+                        action.accept(new Pair<>(currentLeftElement, currentRightElement));
+                    }
+                    action.accept(new Pair<>(currentLeftElement, currentRightElement));
+                    greaterLeft = true;
+                    isFirst = false;
+                }
+                else {
+                    greaterLeft = cmp > 0;
+                    isFirst = false;
+                }
+                return true;
+            }
             return false;
         }
 
-        @Override
+         @Override
         public Spliterator<Pair<L, R>> trySplit() {
             return null;
         }
 
         @Override
         public long estimateSize() {
-            return 0;
+            return Long.MAX_VALUE;
         }
 
         @Override
         public int characteristics() {
-            return 0;
+            return ORDERED;
         }
     }
 
