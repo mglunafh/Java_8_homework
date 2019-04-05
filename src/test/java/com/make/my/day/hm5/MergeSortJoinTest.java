@@ -1,16 +1,18 @@
 package com.make.my.day.hm5;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Optional;
 import javafx.util.Pair;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.Spliterator;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,44 +29,52 @@ public class MergeSortJoinTest {
     public void spliteratorTest() {
 
       List<String> listLeft = Arrays.asList("a b c c o f g h k l".split(" "));
-        Collections.shuffle(listLeft);
-        Stream<String> left = listLeft.stream();
-        List<String> listRight = Arrays.asList("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
-        Collections.shuffle(listRight);
-        Stream<String> right = listRight.stream();
+      List<String> listRight = Arrays.asList("aa bb cc ca cb cd ce dd pp ee ff gg hh kk".split(" "));
 
-        List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
-                right, Function.identity(), s -> s.substring(0, 1), false), false)
-                .map(pair -> pair.getKey() + " " + pair.getValue())
-                .collect(Collectors.toList());
-        List<String> expected = Stream.of(
-                "a aa",
-                "b bb",
-                "c cc",
-                "c ca",
-                "c cb",
-                "c cd",
-                "c ce",
-                "c cc",
-                "c ca",
-                "c cb",
-                "c cd",
-                "c ce",
-                "f ff",
-                "g gg",
-                "h hh",
-                "k kk"
-        ).collect(Collectors.toList());
+      Collections.shuffle(listLeft);
+      Collections.shuffle(listRight);
+      Stream<String> left = listLeft.stream();
+      Stream<String> right = listRight.stream();
 
-        assertThat("Incorrect result", new HashSet<>(result), is(new HashSet<>(expected)));
-        assertThat("Incorrect result order",
-                result.stream()
-                        .map(s -> s.substring(0,3))
-                        .collect(Collectors.toList()),
-                is(expected.stream()
-                        .map(s -> s.substring(0,3))
-                        .collect(Collectors.toList()))
-                );
+      List<String> result = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+          right, Function.identity(), s -> s.substring(0, 1), false), false)
+          .map(pair -> pair.getKey() + " " + pair.getValue())
+          .collect(Collectors.toList());
+      List<String> expected = Stream.of(
+          "a aa",
+          "b bb",
+          "c cc",
+          "c ca",
+          "c cb",
+          "c cd",
+          "c ce",
+          "c cc",
+          "c ca",
+          "c cb",
+          "c cd",
+          "c ce",
+          "f ff",
+          "g gg",
+          "h hh",
+          "k kk"
+      ).collect(Collectors.toList());
+
+      left = listLeft.stream();
+      right = listRight.stream();
+      long count = StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+          right, Function.identity(), s -> s.substring(0, 1), false), false).count();
+
+      assertThat("Incorrect count", expected.size(), is((int) count));
+
+      assertThat("Incorrect result", new HashSet<>(result), is(new HashSet<>(expected)));
+      assertThat("Incorrect result order",
+          result.stream()
+              .map(s -> s.substring(0, 3))
+              .collect(Collectors.toList()),
+          is(expected.stream()
+              .map(s -> s.substring(0, 3))
+              .collect(Collectors.toList()))
+      );
     }
 
     @Test
@@ -88,6 +98,74 @@ public class MergeSortJoinTest {
         assertThat("Incorrect result", result, is(expected));
     }
 
+    @Test
+    public void spliteratorStudentsTest() {
+      String[] names = { "Hans", "Ivanhoe", "Jae-Dong", "John" };
+      String[] surnames = { "Adams", "Kim", "Louis", "Schwartz", "Smith" };
+      
+      int four = names.length;
+      int five = surnames.length;
+      int N = four * five;
+      
+      int generator = 3;
+      int acc = 0;
+      List<String> people = new ArrayList<>(N);
+      for (int i = 0; i < N; i++) {
+        int surnameIndex = acc / four;
+        int nameIndex = acc - four * surnameIndex;
+        String stud = String.format("%02d %s %s", i % generator, names[nameIndex], surnames[surnameIndex]);
+        people.add(stud);
+        System.out.println(stud);
+        
+        acc = (acc + generator) % N;
+      }
+      
+      int coeff = 111;
+      List<String> courses = new ArrayList<>();
+      for (int i = 0; i < 3 * generator; i++) {
+        String str = String.format("%02d %d", i / generator, coeff * i);
+        courses.add(str);
+        System.out.println(str);
+      }
+      
+      int split = N / generator + 1;
+      List<String> peopleCopy = new ArrayList<>(people);
+      Collections.sort(peopleCopy);
+      peopleCopy.forEach(System.out::println);
+      
+      List<Pair<String, String>> joinResult = new ArrayList<>();
+      for (int i = 0; i < generator; i++) {
+        for (int j = i * split; j < peopleCopy.size() && j < (i + 1) * split; j++) {
+          for (int k = i * generator; k < (i + 1) * generator; k++) {
+            joinResult.add(new Pair<>(peopleCopy.get(j), courses.get(k)));
+          }        
+        }
+      }
+      joinResult.forEach(System.out::println);
+      
+      Stream<String> left = people.stream();
+      Stream<String> right = courses.stream();
+      
+      Stream<Pair<String, String>> resultStream = 
+        StreamSupport.stream(new MergeSortInnerJoinSpliterator<>(left,
+            right, 
+            s -> s.substring(0, 2), 
+            s -> s.substring(0, 2), 
+            false), false);
+      
+      List<String> result = resultStream
+          .map(pair -> pair.toString()).collect(Collectors.toList());
+      
+      List<String> expectedList = 
+          joinResult.stream().map(pair -> pair.toString()).collect(Collectors.toList());
+      
+      
+      SortedSet<String> peopleSet = new TreeSet<>(people);
+      assertThat("There are duplicates", people.size(), is(peopleSet.size()));    
+      
+      assertThat("Incorrect result", expectedList, is(result));
+    }
+        
 
     @Test
     public void spliteratorMemoryTest() {
