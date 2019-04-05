@@ -1,18 +1,13 @@
 package com.make.my.day.hm4;
 
+import org.junit.Test;
+
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.junit.Test;
 
 public class Homework04 {
 
@@ -22,7 +17,7 @@ public class Homework04 {
 
     List<String> result = Arrays.stream(words)
         // TODO: Add realization
-        .collect(null, null, null);
+          .collect(ArrayList::new, List::add , List::addAll);
 
     assertArrayEquals(words, result.toArray());
   }
@@ -33,7 +28,7 @@ public class Homework04 {
 
     Set<String> result = Arrays.stream(words)
         // TODO: Add realization
-        .collect(null, null, null);
+          .collect(HashSet::new, Set::add, Set::addAll);
 
     assertArrayEquals(new String[]{"one", "two", "three"}, result.toArray());
   }
@@ -44,7 +39,9 @@ public class Homework04 {
 
     Map<String, Integer> result = Arrays.stream(words)
         // TODO: Add realization to store words - count. If key the same value must increment
-        .collect(null, null, null);
+        //not the most concise and right solution, but it works for parallel stream
+          .collect(HashMap::new, (map, word) -> map.merge(word, 1, (oldVal, newVal) -> oldVal + 1),
+                (map1, map2) -> map2.forEach( (key, value) -> map1.merge(key, value, (oldVal, newVal) -> oldVal + 1)));
 
     Map<String, Integer> expected = new HashMap<>();
     expected.put("one", 3);
@@ -60,10 +57,11 @@ public class Homework04 {
 
     List<String> result = Arrays.stream(words)
         // TODO: Add realization. Should get unique words and concatenate themselves
-        .collect(Collectors.collectingAndThen(
-            null,
-            null
-        ));
+        // I'm trying to avoid Collectors class to get better practice writing my own collectors
+          .collect(Collectors.collectingAndThen(Collector.of(ArrayList<String>::new, List::add, (left, right) -> { left.addAll(right); return left;}),
+                list -> list.stream().distinct().map(str -> str.concat(str))
+                        .collect(Collector.of(ArrayList::new, List::add, (left, right) -> { left.addAll(right); return left; }))
+          ));
 
     assertArrayEquals(new String[]{"oneone", "twotwo", "threethree"}, result.toArray());
   }
@@ -74,7 +72,7 @@ public class Homework04 {
 
     String result = Arrays.stream(words)
         // TODO: Add realization
-        .collect(null);
+          .collect(Collectors.joining(", ", "Materials[ ", " ]"));
 
     assertEquals("Materials[ Glass, Steel, Wood, Stone ]", result);
   }
@@ -85,7 +83,7 @@ public class Homework04 {
 
     Map<Integer, List<String>> result = Arrays.stream(words)
         // TODO: Use here grouping by
-        .collect(null);
+          .collect(Collectors.groupingBy(String::length));
 
     Map<Integer, List<String>> expected = new HashMap<>();
     expected.put(3, Arrays.asList("one", "one", "one", "two", "two"));
@@ -148,7 +146,8 @@ public class Homework04 {
 
     Map<String, List<Integer>> result = dogs.stream()
         // TODO: Use here `groupingBy` plus `mapping`
-        .collect(null);
+          .collect(Collectors.groupingBy(Dog::getName, Collectors.mapping(Dog::getAge,
+                  Collectors.toList())));
 
     Map<String, List<Integer>> expected = new HashMap<>();
     expected.put("Bim", Arrays.asList(4, 8));
@@ -165,7 +164,8 @@ public class Homework04 {
         new Dog("Bim", 4), new Dog("Duke", 7), new Dog("Fenrir", 120));
 
     //TODO: make you'r realization
-    Map<Boolean, List<Dog>> result = null;
+    Map<Boolean, List<Dog>> result = dogs.stream()
+            .collect(Collectors.partitioningBy(dogAge -> (dogAge.getAge() % 2 == 0)));
 
     Map<Boolean, List<Dog>> expected = new HashMap<>();
     expected.put(true, Arrays.asList(new Dog("Bim", 4), new Dog("Fenrir", 120)));
@@ -254,8 +254,14 @@ public class Homework04 {
     );
 
     //TODO: Make your realization
-    List<UserDTO> result = null;
 
+    Map<String, List<Role>> dtoUserMap = usersFromDB.stream()
+            .collect(Collectors.groupingBy(User::getEmail,
+                    Collectors.mapping(User::getRole, Collectors.toList())));
+
+    List<UserDTO> result = dtoUserMap.entrySet().stream()
+            .map(entry -> new UserDTO(entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList());
 
     List<UserDTO> expected = Arrays.asList(
         new UserDTO("someone@epam.com", Arrays.asList(Role.USER)),
